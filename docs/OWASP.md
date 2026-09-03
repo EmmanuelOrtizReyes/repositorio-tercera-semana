@@ -1,25 +1,25 @@
-# Riesgos OWASP aplicables
+# Applicable OWASP risks
 
 ## A01: Broken Access Control
 
-**Riesgo:** un usuario autenticado podría intentar crear productos o registrar ventas sin autorización adecuada.
+**Risk:** an authenticated user could attempt to create products or record sales without the required authorization.
 
-**Mitigación implementada:** `AuthGuard('jwt')` protege `POST /products` y `POST /sales`; el usuario de la venta se obtiene del token en el servidor.
+**Implemented mitigation:** `AuthGuard('jwt')` protects `POST /products` and `POST /sales`; the sale owner is taken from the server-validated token.
 
-**Mitigación recomendada:** incorporar roles y permisos de administrador para separar catálogo y operación de ventas.
+**Recommended mitigation:** add roles and administrator permissions to separate catalog management from sales operations.
 
 ## A03: Injection
 
-**Riesgo:** datos enviados al API podrían usarse para manipular consultas SQL.
+**Risk:** API input could be used to manipulate SQL queries.
 
-**Mitigación implementada:** Prisma parametriza las consultas; no se concatena SQL con datos del usuario y los DTOs validan tipos, rangos y longitudes.
+**Implemented mitigation:** Prisma parameterizes queries, raw SQL concatenation is avoided, and DTOs validate types, ranges, and lengths.
 
-**Mitigación recomendada:** mantener revisiones de consultas raw, si fueran necesarias, y pruebas de seguridad automatizadas.
+**Recommended mitigation:** review and test every raw query if one becomes necessary in the future.
 
 ## A07: Identification and Authentication Failures
 
-**Riesgo:** contraseñas o tokens mal protegidos podrían permitir suplantación de usuarios.
+**Risk:** weak password or token handling could enable account impersonation.
 
-**Mitigación implementada:** bcrypt con factor 12, JWT con expiración configurable, respuesta pública sin `password_hash`, validación de credenciales y guard JWT.
+**Implemented mitigation:** bcrypt with cost factor 12, configurable JWT expiration, public responses without `password_hash`, credential validation, and JWT guards.
 
-**Mitigación recomendada:** cookies `HttpOnly`/`Secure`, rotación y revocación de tokens, rate limiting y gestión segura de secretos en producción. El frontend actual conserva JWT en `localStorage` como decisión del MVP.
+**Recommended mitigation:** use `HttpOnly` and `Secure` cookies, token rotation and revocation, rate limiting, and production secret management. The current MVP keeps the JWT in `localStorage` for simplicity.

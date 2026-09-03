@@ -1,96 +1,60 @@
 # Dulces Emma
 
-MVP mobile-first para registro e inicio de sesión de una dulcería. Incluye React/Vite, NestJS, PostgreSQL, Prisma, bcrypt y JWT.
+Mobile-first monolith for managing a candy store. The application code lives under `app/`: React/Vite PWA in `app/frontend` and NestJS/Prisma API in `app/backend`.
 
-## Requisitos
+## Requirements
 
-Ubuntu, Node.js 20+, npm y PostgreSQL. Instálalo en Ubuntu con:
+Node.js 20+, pnpm 9+, PostgreSQL, and a configured `DATABASE_URL`.
 
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo systemctl enable postgresql
-sudo systemctl start postgresql
-```
+## Database setup
 
-## Configurar PostgreSQL
-
-Los siguientes comandos crean un usuario de aplicación y la base de datos. Sustituye `una_contrasena_segura` por una contraseña propia:
+PostgreSQL is the initial source of truth. Apply the SQL before introspecting Prisma. Do not use `prisma migrate dev` for this database-first setup.
 
 ```bash
-sudo -u postgres psql
-CREATE USER dulces_emma_user WITH PASSWORD 'una_contrasena_segura';
-CREATE DATABASE dulces_emma OWNER dulces_emma_user;
-\q
-```
-
-## Database First
-
-PostgreSQL es la fuente de verdad inicial: el SQL se aplica antes de que Prisma introspeccione el modelo. No ejecutes `prisma migrate dev` para crear este esquema.
-
-```bash
-psql -U dulces_emma_user -h localhost -d dulces_emma -f backend/database/schema.sql
+psql -U dulces_emma_user -h localhost -d dulces_emma -f app/backend/database/schema.sql
 psql -U dulces_emma_user -h localhost -d dulces_emma -f database/seed.sql
-cp backend/.env.example backend/.env
-# Edita backend/.env y coloca el usuario y contraseña reales en DATABASE_URL,
-# además de un JWT_SECRET largo y aleatorio.
-cd backend
-npx prisma db pull
-npx prisma generate
-cd ..
+cp app/backend/.env.example app/backend/.env
+cp app/frontend/.env.example app/frontend/.env
+cd app/backend
+pnpm prisma:pull
+pnpm prisma:generate
+cd ../..
 ```
 
-`db pull` actualizará `backend/prisma/schema.prisma` con el modelo introspectado desde la tabla `users` real.
+Configure `DATABASE_URL`, `JWT_SECRET`, and `FRONTEND_URL` in `app/backend/.env`. Leave `VITE_API_URL` empty during development: Vite proxies `/api` to the local API and avoids browser CORS issues. Configure the public HTTPS API URL in production.
 
-## Variables de entorno
+## Install and run
+
+Run these commands from the repository root, where `package.json` and `pnpm-workspace.yaml` are located:
 
 ```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+pnpm install
+pnpm run dev
 ```
 
-En `backend/.env`, configura `DATABASE_URL` y `JWT_SECRET`. El frontend usa `VITE_API_URL=http://localhost:3000` por defecto.
+`pnpm run dev` and `pnpm run dev:all` start both workspaces. Vite prints the local and network URLs, normally `http://localhost:5173` and `http://YOUR_LOCAL_IP:5173`. NestJS listens on port `3000`.
 
-## Instalar y ejecutar
+Build both applications:
 
 ```bash
-npm install
-npm run install:all
-npm run dev
+pnpm run build
 ```
 
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3000
-
-Para compilar ambos proyectos:
-
-```bash
-npm run build
-```
+The frontend includes a web manifest, icon, and service worker and can be installed as a PWA in a compatible browser.
 
 ## API
 
-- `POST /auth/register` — nombre, correo y contraseña (mínimo 8 caracteres).
-- `POST /auth/login` — devuelve `accessToken` y usuario público.
-- `GET /auth/profile` — requiere `Authorization: Bearer TOKEN`.
-- `GET /products` y `GET /products/:id` — catálogo de productos.
-- `POST /products` — crea producto; requiere JWT.
-- `POST /sales` — registra una venta y descuenta inventario en una transacción; requiere JWT.
+- `POST /auth/register` — name, email, and password of at least 8 characters.
+- `POST /auth/login` — returns an access token and public user.
+- `GET /auth/profile` — requires `Authorization: Bearer TOKEN`.
+- `GET /products` and `GET /products/:id` — product catalog.
+- `POST /products` — creates a product and requires JWT.
+- `POST /sales` — records a sale and atomically decreases stock; requires JWT.
 
-Para una venta, envía `{ "items": [{ "productId": 1, "quantity": 2 }] }`.
+For a sale, send `{ "items": [{ "productId": 1, "quantity": 2 }] }`.
 
-## Evidencias
+## Evidence
 
-Importa `postman/Dulceria.postman_collection.json` en Postman. Las consultas y ejemplos SQL están en `database/`; la guía completa de presentación está en [EVIDENCIAS.md](EVIDENCIAS.md) y el análisis OWASP en [docs/OWASP.md](docs/OWASP.md).
+Import `postman/Dulceria.postman_collection.json` into Postman. SQL examples are in `database/`; the presentation guide is [EVIDENCIAS.md](EVIDENCIAS.md), and the OWASP analysis is [docs/OWASP.md](docs/OWASP.md).
 
-Prueba el perfil, después de iniciar sesión, con:
-
-```bash
-curl -H "Authorization: Bearer TOKEN" http://localhost:3000/auth/profile
-```
-
-El registro almacena exclusivamente `password_hash` con bcrypt; compruébalo con `psql -U dulces_emma_user -h localhost -d dulces_emma -c 'SELECT id,name,email,password_hash FROM users;'`.
-
-## Nota de seguridad
-
-El MVP guarda el token en `localStorage` para reducir complejidad. Para producción se debería evaluar una sesión basada en cookies `HttpOnly`, protección CSRF y una política de renovación de tokens.
+The existing authentication flow stores only a bcrypt password hash and never returns it. The MVP stores the JWT in `localStorage`; production deployments should evaluate `HttpOnly` cookies, CSRF protection, token rotation, and rate limiting.

@@ -1,4 +1,4 @@
--- Datos de prueba; no elimina ni modifica usuarios existentes.
+-- Test data; does not delete or modify existing users.
 INSERT INTO products (name, description, price, stock, category) VALUES
 ('Mazapán', 'Mazapán de cacahuate', 8.50, 50, 'Dulces tradicionales'),
 ('Pulparindo', 'Tamarindo enchilado', 12.00, 30, 'Dulces tradicionales'),
