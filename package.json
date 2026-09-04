@@ -1,0 +1,13 @@
+{
+  "name": "dulces-emma",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm run dev:all",
+    "dev:all": "concurrently --names api,web --prefix-colors blue,magenta \"pnpm --filter @dulces-emma/backend start:dev\" \"pnpm --filter @dulces-emma/frontend dev\"",
+    "build": "pnpm --filter @dulces-emma/backend build && pnpm --filter @dulces-emma/frontend build",
+    "db:generate": "pnpm --filter @dulces-emma/backend prisma:generate"
+  },
+  "devDependencies": { "concurrently": "^9.1.2" }
+}

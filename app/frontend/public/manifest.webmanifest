@@ -1,0 +1,10 @@
+{
+  "name": "Dulces Emma",
+  "short_name": "Dulces Emma",
+  "description": "Administración móvil de la dulcería Dulces Emma.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f9fb",
+  "theme_color": "#4f8fb8",
+  "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
