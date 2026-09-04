@@ -1,60 +1,156 @@
 # Dulces Emma
 
-Mobile-first monolith for managing a candy store. The application code lives under `app/`: React/Vite PWA in `app/frontend` and NestJS/Prisma API in `app/backend`.
+## Descripción
 
-## Requirements
+Dulces Emma es una aplicación web académica para gestionar usuarios, consultar productos y registrar productos de una dulcería.
 
-Node.js 20+, pnpm 9+, PostgreSQL, and a configured `DATABASE_URL`.
+## Objetivo
 
-## Database setup
+Proyecto Integrador Final para demostrar frontend, API REST, autenticación, persistencia relacional, validación, pruebas y documentación técnica.
 
-PostgreSQL is the initial source of truth. Apply the SQL before introspecting Prisma. Do not use `prisma migrate dev` for this database-first setup.
+## Tecnologías
 
-```bash
-psql -U dulces_emma_user -h localhost -d dulces_emma -f app/backend/database/schema.sql
-psql -U dulces_emma_user -h localhost -d dulces_emma -f database/seed.sql
-cp app/backend/.env.example app/backend/.env
-cp app/frontend/.env.example app/frontend/.env
-cd app/backend
-pnpm prisma:pull
-pnpm prisma:generate
-cd ../..
+- Frontend: React, Vite, TypeScript, Fetch y React Router.
+- Backend: NestJS, TypeScript, API REST, JWT y bcrypt.
+- Base de datos: PostgreSQL y Prisma ORM.
+- Testing: Jest, ts-jest y Supertest.
+- Herramientas: pnpm, Docker y Postman.
+
+## Arquitectura
+
+```text
+React → API REST → NestJS → Prisma → PostgreSQL
 ```
 
-Configure `DATABASE_URL`, `JWT_SECRET`, and `FRONTEND_URL` in `app/backend/.env`. Leave `VITE_API_URL` empty during development: Vite proxies `/api` to the local API and avoids browser CORS issues. Configure the public HTTPS API URL in production.
+El frontend consume productos mediante Fetch y autenticación mediante Axios. NestJS organiza controllers, services, DTOs y guards. Prisma accede a PostgreSQL.
 
-## Install and run
+## Funcionalidades
 
-Run these commands from the repository root, where `package.json` and `pnpm-workspace.yaml` are located:
+- Registro de usuarios.
+- Inicio de sesión con JWT.
+- Ruta protegida.
+- Dashboard con resumen y consulta de productos.
+- Registro de productos.
+- Registro de ventas mediante `POST /sales` con actualización transaccional de stock.
+- PWA básica con manifest, icono y service worker.
+
+## Estructura
+
+```text
+app/
+├── backend/
+│   ├── prisma/
+│   ├── src/auth/
+│   ├── src/products/
+│   ├── src/sales/
+│   └── test/
+└── frontend/src/
+database/
+docs/
+postman/
+```
+
+## Requisitos previos
+
+Node.js 20+, pnpm 9+, PostgreSQL disponible y Docker si la base se ejecuta en contenedor.
+
+## Instalación
+
+Desde la raíz:
 
 ```bash
 pnpm install
+cp app/backend/.env.example app/backend/.env
+cp app/frontend/.env.example app/frontend/.env
+pnpm --filter @dulces-emma/backend prisma:generate
+```
+
+## Variables de entorno
+
+Ejemplo para `app/backend/.env`:
+
+```env
+PORT=3000
+DATABASE_URL="postgresql://usuario:password@127.0.0.1:5434/dulces_emma?schema=public"
+JWT_SECRET="example-secret"
+JWT_EXPIRES_IN="1d"
+FRONTEND_URL="http://localhost:5173"
+```
+
+En `app/frontend/.env`, `VITE_API_URL` puede quedar vacío para usar el proxy de Vite, o configurarse como `http://localhost:3000`. Los secretos no deben versionarse.
+
+## Base de datos con Docker
+
+No existe `docker-compose.yml` versionado en este repositorio. Verifica el contenedor local:
+
+```bash
+docker ps -a
+```
+
+Si el contenedor local se llama `dulces-emma-postgres`:
+
+```bash
+docker start dulces-emma-postgres
+docker ps
+```
+
+El modelo es database-first; consulta [docs/database.md](docs/database.md).
+
+## Ejecutar
+
+Backend:
+
+```bash
+pnpm --filter @dulces-emma/backend start:dev
+```
+
+Frontend, en otra terminal:
+
+```bash
+pnpm --filter @dulces-emma/frontend dev
+```
+
+Todo junto:
+
+```bash
 pnpm run dev
 ```
 
-`pnpm run dev` and `pnpm run dev:all` start both workspaces. Vite prints the local and network URLs, normally `http://localhost:5173` and `http://YOUR_LOCAL_IP:5173`. NestJS listens on port `3000`.
+URLs habituales: `http://localhost:5173` y `http://localhost:3000`.
 
-Build both applications:
+## Build y pruebas
 
 ```bash
 pnpm run build
+pnpm --filter @dulces-emma/backend test
+pnpm --filter @dulces-emma/backend test:e2e
 ```
 
-The frontend includes a web manifest, icon, and service worker and can be installed as a PWA in a compatible browser.
+La E2E requiere PostgreSQL activo y `DATABASE_URL` válida. Consulta [docs/TESTING.md](docs/TESTING.md) para los resultados verificados.
 
-## API
+## Endpoints principales
 
-- `POST /auth/register` — name, email, and password of at least 8 characters.
-- `POST /auth/login` — returns an access token and public user.
-- `GET /auth/profile` — requires `Authorization: Bearer TOKEN`.
-- `GET /products` and `GET /products/:id` — product catalog.
-- `POST /products` — creates a product and requires JWT.
-- `POST /sales` — records a sale and atomically decreases stock; requires JWT.
+| Método | Endpoint | Descripción |
+|---|---|---|
+| POST | `/auth/register` | Registra usuario |
+| POST | `/auth/login` | Autentica y devuelve JWT |
+| GET | `/auth/profile` | Devuelve perfil autenticado |
+| GET | `/products` | Lista productos |
+| GET | `/products/:id` | Consulta un producto |
+| POST | `/products` | Crea producto autenticado |
+| POST | `/sales` | Registra venta autenticada |
 
-For a sale, send `{ "items": [{ "productId": 1, "quantity": 2 }] }`.
+## Postman
 
-## Evidence
+La colección está en [postman/Dulceria.postman_collection.json](postman/Dulceria.postman_collection.json). Usa `{{baseUrl}}`; el procedimiento está en [docs/POSTMAN.md](docs/POSTMAN.md).
 
-Import `postman/Dulceria.postman_collection.json` into Postman. SQL examples are in `database/`; the presentation guide is [EVIDENCIAS.md](EVIDENCIAS.md), and the OWASP analysis is [docs/OWASP.md](docs/OWASP.md).
+## Accesibilidad, seguridad y evidencias
 
-The existing authentication flow stores only a bcrypt password hash and never returns it. The MVP stores the JWT in `localStorage`; production deployments should evaluate `HttpOnly` cookies, CSRF protection, token rotation, and rate limiting.
+- [Accesibilidad](docs/ACCESSIBILITY-CHECKLIST.md)
+- [OWASP](docs/OWASP-CHECKLIST.md)
+- [Guía de evidencias](docs/evidencias/README.md)
+- [Índice de documentación](docs/README.md)
+
+## Autor
+
+Emmanuel Ortiz Reyes

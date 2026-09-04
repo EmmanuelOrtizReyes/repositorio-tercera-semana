@@ -7,7 +7,8 @@ type ProductsState = {
   isLoading: boolean;
 };
 
-export function useProducts(): ProductsState {
+export function useProducts(): ProductsState & { reload: () => void } {
+  const [reloadKey, setReloadKey] = useState(0);
   const [state, setState] = useState<ProductsState>({ products: [], error: null, isLoading: true });
 
   useEffect(() => {
@@ -16,7 +17,7 @@ export function useProducts(): ProductsState {
       .then((products) => isMounted && setState({ products, error: null, isLoading: false }))
       .catch(() => isMounted && setState({ products: [], error: 'No se pudieron cargar los productos.', isLoading: false }));
     return () => { isMounted = false; };
-  }, []);
+  }, [reloadKey]);
 
-  return state;
+  return { ...state, reload: () => setReloadKey((key) => key + 1) };
 }

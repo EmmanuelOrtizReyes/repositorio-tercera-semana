@@ -41,9 +41,9 @@ export function RegisterPage() {
         <div className="brand">Dulces Emma</div>
         <h1>Crear cuenta</h1>
         <form onSubmit={submit}>
-          <label>
+          <label htmlFor="register-name">
             Nombre
-            <input
+            <input id="register-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -52,9 +52,9 @@ export function RegisterPage() {
               autoComplete="name"
             />
           </label>
-          <label>
+          <label htmlFor="register-email">
             Correo
-            <input
+            <input id="register-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -62,9 +62,9 @@ export function RegisterPage() {
               autoComplete="email"
             />
           </label>
-          <label>
+          <label htmlFor="register-password">
             Contraseña
-            <input
+            <input id="register-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -73,9 +73,9 @@ export function RegisterPage() {
               autoComplete="new-password"
             />
           </label>
-          <label>
+          <label htmlFor="register-confirm">
             Confirmar contraseña
-            <input
+            <input id="register-confirm"
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
@@ -84,7 +84,7 @@ export function RegisterPage() {
               autoComplete="new-password"
             />
           </label>
-          {error && <p className="message error">{error}</p>}
+          {error && <p id="register-error" className="message error" role="alert">{error}</p>}
           <button disabled={loading}>
             {loading ? "Creando…" : "Crear cuenta"}
           </button>

@@ -6,6 +6,8 @@
     "start": "node dist/main",
     "start:dev": "nest start --watch",
     "build": "nest build",
+    "test": "jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "prisma:pull": "prisma db pull",
     "prisma:generate": "prisma generate"
   },
@@ -31,10 +33,15 @@
     "@nestjs/testing": "^10.4.15",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.17.19",
+    "@types/jest": "^29.5.14",
+    "@types/supertest": "^6.0.2",
     "@types/passport-jwt": "^4.0.1",
     "prisma": "^6.3.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5"
   }
 }

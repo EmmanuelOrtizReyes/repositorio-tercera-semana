@@ -34,9 +34,9 @@ export function LoginPage() {
         <h1>Bienvenido a Dulces Emma</h1>
         {success && <p className="message">{success}</p>}
         <form onSubmit={submit}>
-          <label>
+          <label htmlFor="login-email">
             Correo electrónico
-            <input
+            <input id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -44,9 +44,9 @@ export function LoginPage() {
               autoComplete="email"
             />
           </label>
-          <label>
+          <label htmlFor="login-password">
             Contraseña
-            <input
+            <input id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -55,7 +55,7 @@ export function LoginPage() {
               autoComplete="current-password"
             />
           </label>
-          {error && <p className="message error">{error}</p>}
+          {error && <p id="login-error" className="message error" role="alert">{error}</p>}
           <button disabled={loading}>
             {loading ? "Ingresando…" : "Iniciar sesión"}
           </button>
